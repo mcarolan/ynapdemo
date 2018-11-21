@@ -116,7 +116,6 @@ calls to the appropriate function.
         case Empty()     => empty
       }
 
-    def map[B](f: T => Maybe[B]): Maybe[B] = ???
   }
   case class Full[T](value: T) extends Maybe[T]
   case class Empty[T]() extends Maybe[T]
@@ -177,6 +176,7 @@ calls to the appropriate function.
   * Introduce flatMap (diagram)
   * Implement for Maybe
    */
+
 //  final case class Order(orderId: Int)
 //  def firstOrder(user: User): Maybe[Order] =
 //    ???
@@ -192,13 +192,15 @@ calls to the appropriate function.
 
   Exercises:
   Implement map for LinkedList
+  Implement  map and flatMap for your Result type
+
   Use it with a LinkedList[Int] to:
     Produce a new list with each element doubled
     Produce a new list with each element incremented
 
-   * Implement flatMap for Maybe
-   * Implement map for Maybe
-   * Try to implement map only using flatMap
+ Implement flatMap for Maybe
+ Implement map for Maybe
+ Try to implement map only using flatMap
 
    Using the following Scala list:
    val numbers: List(1, 2, 3)
@@ -209,7 +211,5 @@ calls to the appropriate function.
    val list = List(Maybe(1), Maybe(2), Maybe(3))
    compute a new list, which contains Empty if the number is odd, and the number in a Full if it is even
 
-
-   Implement  map and flatMap for your Sum type
    */
 }

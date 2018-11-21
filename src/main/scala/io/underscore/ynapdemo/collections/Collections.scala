@@ -7,6 +7,12 @@ object Collections extends App {
 
   Create a Seq containing the String s "cat" , "dog" , and "penguin" . Bind it to the name animals.
   Append the element "tyrannosaurus" to animals and prepend the element "mouse" .
+
+  apply
+  head
+  headOption
+  tail
+
    */
 
   case class Film(
@@ -70,7 +76,6 @@ specified order
    */
 
 
-
   /*
   Nolan Films:
   Staring with the definiton of nolan , create a list containing the names of the films directed by Christopher
@@ -94,8 +99,6 @@ Nolan.
    */
 
 
-
-
   /*
   Minimum:
   Write a method to find the smallest element of a Seq[Int].
@@ -114,6 +117,26 @@ implementation as the input. Hint: use foldLeft .
 
   fold left:
   Write your own implementation of foldLeft that uses foreach and mutable state
+   */
+
+
+  /*
+
+   For comprehensions:
+    syntactic sugar for map / flatMap
+    patterns, generators
+
+
+  Options
+  Write a method addOptions that accepts two parameters of type Option[Int] and adds them together. Use
+a for comprehension to structure your code.
+
+  Write a second version of your code using map and flatMap instead of a for comprehension.
+
+  Overload addOptions with another implementation that accepts three Option[Int] parameters and adds
+them all together.
+
+  Write a second version of your code using map and flatMap instead of a for comprehension.
    */
 
 }
