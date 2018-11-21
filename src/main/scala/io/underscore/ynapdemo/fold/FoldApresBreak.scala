@@ -116,6 +116,19 @@ calls to the appropriate function.
         case Empty()     => empty
       }
 
+    def map[U](f: T => U): Maybe[U] =
+      this match {
+        case Full(value) => Full(f(value))
+        case Empty()     => Empty[U]()
+      }
+
+
+    def flatMap[U](f: T => Maybe[U]): Maybe[U] =
+      this match {
+        case Full(value) => f(value)
+        case Empty()     => Empty[U]()
+      }
+
   }
   case class Full[T](value: T) extends Maybe[T]
   case class Empty[T]() extends Maybe[T]
@@ -164,6 +177,22 @@ calls to the appropriate function.
         case LinkedListEnd()               => LinkedListEnd[U]()
       }
 
+    def concat(list: LinkedList[T]): LinkedList[T] =
+      this match {
+        case LinkedListElement(elem, next) => LinkedListElement(elem, next.concat(list))
+        case LinkedListEnd()               => list
+      }
+
+    def flatMap[U](f: T => LinkedList[U]): LinkedList[U] =
+      this match {
+        case LinkedListElement(elem, next) => {
+          val l1: LinkedList[U] = f(elem)
+          val l2: LinkedList[U] = next.flatMap(f)
+          l1.concat(l2)
+        }
+        case LinkedListEnd()               => LinkedListEnd()
+      }
+
   }
   case class LinkedListElement[T](elem: T, next: LinkedList[T]) extends LinkedList[T]
   case class LinkedListEnd[T]() extends LinkedList[T]
@@ -177,14 +206,16 @@ calls to the appropriate function.
   * Implement for Maybe
    */
 
-//  final case class Order(orderId: Int)
-//  def firstOrder(user: User): Maybe[Order] =
-//    ???
-//  def lookupUser(userId: Int): Maybe[User] =
-//    ???
-//
-//  val userId = 123
-//  val firstOrder: Maybe[Order] = ???
+  final case class Order(orderId: Int)
+
+  def firstOrder(user: User): Maybe[Order] =
+    ???
+  def lookupUser(userId: Int): Maybe[User] =
+    ???
+
+  val userId = 123
+//  val firstOrder: Maybe[Order] = lookupUser(userId).flatMap(user => firstOrder(user))
+
 
   /*
   Terms: functor and monad
@@ -192,7 +223,8 @@ calls to the appropriate function.
 
   Exercises:
   Implement map for LinkedList
-  Implement  map and flatMap for your Result type
+  Implement map and flatMap for Maybe
+  Implement map and flatMap for your Result type
 
   Use it with a LinkedList[Int] to:
     Produce a new list with each element doubled
@@ -201,15 +233,25 @@ calls to the appropriate function.
  Implement flatMap for Maybe
  Implement map for Maybe
  Try to implement map only using flatMap
+  */
+  val numbers = LinkedListElement(1, LinkedListElement(2, LinkedListElement(3, LinkedListEnd())))
+  val numbersAndNegation = numbers.flatMap(i => LinkedListElement(i, LinkedListElement(-i, LinkedListEnd())))
+  println(numbersAndNegation)
+ /*
+   Using the a LinkedList with elements 1, 2, 3
+   compute a new LinkedList, containing each number and its negation (order does not matter)
+   val numbersAndNegation: LinkedList[Int] = ???
 
-   Using the following Scala list:
-   val numbers: List(1, 2, 3)
-   compute a new list, containing each number and its negation (order does not matter)
-   val numbersAndNegation: List[Int] = ???
+  */
 
+  /*
    From the following Scala list:
-   val list = List(Maybe(1), Maybe(2), Maybe(3))
+   val list = LinkedList(Maybe(1), Maybe(2), Maybe(3))
    compute a new list, which contains Empty if the number is odd, and the number in a Full if it is even
-
    */
+
+  val list = LinkedListElement(Full(1), LinkedListElement(Full(2), LinkedListElement(Full(3), LinkedListEnd())))
+  val list2 = list.map(_.flatMap(i => if (i % 2 == 0) Full(i) else Empty[Int]()))
+  println(list2)
+
 }
