@@ -56,7 +56,7 @@ object Collections extends App {
   val directors = Seq(eastwood, mcTiernan, nolan, someGuy)
 
   /*
-    Accept a parameter numberOfFilms of type Int —find all directors who have directed more than
+    Accept a parameter numberOfFilms of type Int — find all directors who have directed more than
 numberOfFilms
 
     Accept a parameter year of type Int —find a director who was born before that year
@@ -69,23 +69,17 @@ specified order
 
    */
 
-  /*
-  Other notable things about sequencing collections:
-    Concept: foldLeft vs foldRight
-    Concept: foreach
-   */
-
 
   /*
   Nolan Films:
-  Staring with the definiton of nolan , create a list containing the names of the films directed by Christopher
+  Staring with the definition of nolan , create a list containing the names of the films directed by Christopher
 Nolan.
 
   Cinephile:
-  Startng with the definiton of directors , create a list containing the names of all films by all directors.
+  Starting with the definiton of directors , create a list containing the names of all films by all directors.
 
   McTiernan:
-  Startng with mcTiernan, find the date of the earliest McTiernan film.
+  Starting with mcTiernan, find the date of the earliest McTiernan film.
 
   High Score Table:
   Starting with directors, find all films sorted by descending IMDB rating:
@@ -97,6 +91,9 @@ Nolan.
   From the archives:
   Finally, starting with directors again, find the earliest film by any director:
    */
+
+  val messages: List[String] = ???
+  messages.foreach(println)
 
 
   /*
@@ -138,5 +135,15 @@ them all together.
 
   Write a second version of your code using map and flatMap instead of a for comprehension.
    */
+
+  val aOpt = Option(("blah", "wibble"))
+  val bOpt = Option("bleh")
+
+  for {
+    (a, b) <- aOpt
+    b <- bOpt
+  }
+    yield a + " " + b
+
 
 }

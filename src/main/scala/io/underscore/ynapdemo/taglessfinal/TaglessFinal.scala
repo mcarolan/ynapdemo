@@ -83,6 +83,13 @@ object Attempt3 extends App {
     def add(a: F[Int], b: F[Int]): F[Int] =
       F.flatMap(a)(a => F.map(b)(b => a + b))
 
+    def multiply(fa: F[Int], fb: F[Int]): F[Int] =
+      for {
+        a <- fa
+        b <- fb
+      }
+        yield a * b
+
   }
 
   object Calculator {
