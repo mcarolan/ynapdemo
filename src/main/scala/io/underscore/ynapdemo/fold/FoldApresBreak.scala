@@ -109,7 +109,7 @@ calls to the appropriate function.
    */
 
 
-  sealed trait Maybe[T] {
+  sealed trait Maybe[+T] {
     def fold[B](full: T => B, empty: B): B =
       this match {
         case Full(value) => full(value)
@@ -130,8 +130,22 @@ calls to the appropriate function.
       }
 
   }
+
+
   case class Full[T](value: T) extends Maybe[T]
   case class Empty[T]() extends Maybe[T]
+
+  sealed trait Fruit
+  case class Apple() extends Fruit
+  case class Pear() extends Fruit
+
+  val maybeApple: Maybe[Apple] = Full(Apple())
+  val maybeFruit: Maybe[Fruit] = maybeApple
+
+  /*
+  covariance:
+    F[A] is a subclass of F[B] if A is a subclass of B
+   */
 
   case class IntAndString(intValue: Int, stringValue: String)
 
@@ -199,7 +213,10 @@ calls to the appropriate function.
 
   val users: LinkedList[User] = LinkedListElement(User(1, "Martin"), LinkedListElement(User(2, "Denis"), LinkedListEnd()))
 
-  val userIds: LinkedList[Int] = users.map(u => u.userId)
+  def grabUserId(user: User): Int =
+    user.userId
+
+  val userIds: LinkedList[Int] = users.map(grabUserId)
 
   /*
   * Introduce flatMap (diagram)
@@ -209,16 +226,24 @@ calls to the appropriate function.
   final case class Order(orderId: Int)
 
   def firstOrder(user: User): Maybe[Order] =
-    ???
+    if (user.userId == 123)
+      Full(Order(4865874))
+    else
+      Empty()
+
   def lookupUser(userId: Int): Maybe[User] =
-    ???
+    if (userId == 123)
+      Full(User(123, "Helene"))
+    else
+      Empty()
 
   val userId = 123
-//  val firstOrder: Maybe[Order] = lookupUser(userId).flatMap(user => firstOrder(user))
+  val firstOrderFor123: Maybe[Order] =
+    lookupUser(userId).flatMap(firstOrder)
 
 
   /*
-  Terms: functor and monad
+  Terms: functor and
   Take away point: they allow computations to be sequenced, run one after another but stopping on failure
 
   Exercises:
@@ -226,7 +251,7 @@ calls to the appropriate function.
   Implement map and flatMap for Maybe
   Implement map and flatMap for your Result type
 
-  Use it with a LinkedList[Int] to:
+  Use it with a LinkedList[Int] monado:
     Produce a new list with each element doubled
     Produce a new list with each element incremented
 

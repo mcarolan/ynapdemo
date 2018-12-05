@@ -2,7 +2,7 @@ package io.underscore.ynapdemo.typeclass
 
 import scala.concurrent.Future
 
-object Typeclasses extends App {
+object Typeclasses extends App  {
 
   sealed trait Json
   case class JsonString(value: String) extends Json
@@ -10,84 +10,85 @@ object Typeclasses extends App {
   case class JsonObject(fields: Map[String, Json]) extends Json
   case object JsonNull extends Json
 
-  case class ReportingParameters(resourceType: String, source: Int)
-
-  sealed trait Store
-  case object MrPorter extends Store
-  case object NetAPorter extends Store
-
-  object Store {
-    def buildAJson(store: Store): Json =
-      store match {
-        case MrPorter   => JsonString("MrPorter")
-        case NetAPorter => JsonString("NetAPorter")
-      }
+  object Json {
+    def apply[A](value: A)(implicit jsonWritable: JsonWritable[A]): Json =
+      jsonWritable.writeJson(value)
   }
 
-  val name: String = "Martin"
 
+  case class ReportingParameters(source: String, productType: String, customerNumber: Int)
+  object ReportingParameters {
 
-  object MessagePublisher {
-
-    def publish(store: Store): Future[Unit] = ???
-
-    def publish(store: ReportingParameters): Future[Unit] = ???
-
-    def publish(store: String): Future[Unit] = ???
-
+    implicit val ReportingParametersJsonWriteable: JsonWritable[ReportingParameters] =
+      (value: ReportingParameters) => JsonObject(
+        Map(
+          "source" -> JsonString(value.source),
+          "productType" -> JsonString(value.productType),
+          "customerNumber" -> JsonNumber(value.customerNumber)
+        )
+      )
 
   }
+
+  implicit class JsonWritableSyntax[A](val value: A)(implicit jsonWritable: JsonWritable[A]) {
+
+    def asJson: Json =
+      jsonWritable.writeJson(value)
+
+  }
+
+  def numberToJson(number: Int): Json = JsonNumber(number)
+
+  val reportingParameters = ReportingParameters("MRPORTER", "COAT", 123)
+  val reportingParametersJson: Json = reportingParameters.asJson
+  val meaningOfLifeAsJson: Json = 42.asJson
+
+
+  val reportingParametersOptJson: Json = (Some(reportingParameters): Option[ReportingParameters]).asJson
+
+  trait QueuePublisher {
+
+    def publish(json: Json): Future[Unit]
+
+  }
+
+  trait JsonWritable[-A] {
+    def writeJson(value: A): Json
+  }
+
+  object JsonWritable {
+
+    implicit val StringJsonWritable : JsonWritable[String] = (value: String) => JsonString(value)
+
+    implicit val IntJsonWritable: JsonWritable[Int] = (value: Int) => JsonNumber(value)
+
+    implicit def OptionJsonWritable[A](implicit jsonWritable: JsonWritable[A]): JsonWritable[Option[A]] =
+      (value: Option[A]) => value.fold[Json](JsonNull)(jsonWritable.writeJson)
+
+  }
+
+
+//  implicit def intToBoolean(int: Int): Boolean =
+//    if (int == 10) true else false
+//
+//  val boolean: Boolean = 42
 
     /*
     Motivation
     The 3 parts:
       Typeclass definition
-    */
+      Typeclass instances
 
-    trait JsonWritable[T] {
-      def write(value: T): Json
-    }
-
-
-   /*
-    Typeclass instances
+      Typeclass interfaces: interface objects
+      Typeclass interfaces: implicit syntax
    */
 
-    object JsonWritable {
-      implicit val reportingParametersJsonWritable: JsonWritable[ReportingParameters] =
-        (value: ReportingParameters) => JsonObject(Map("resourceType" -> JsonString(value.resourceType), "source" -> JsonNumber(value.source)))
-    }
+  //interface object usage
+  val jsonString: Json = Json("hello")
+  val jsonString2: Json = "hello".asJson
 
-    object Blah {
-      implicit val stringJsonWritable: JsonWritable[String] =
-        (value: String) => JsonString(value)
-    }
 
-   /*
-    Typeclass interfaces: interface objects
-   */
-
-    object Json {
-      def apply[T](value: T)(implicit jsonWritable: JsonWritable[T]): Json =
-        jsonWritable.write(value)
-    }
-
-    val reportingParameters: ReportingParameters = ReportingParameters(resourceType = "wibble", source = 42)
-    val reportingParametersJson: Json = Json(reportingParameters)
-
-  /*
-    Typeclass interfaces: implicit syntax
-   */
-
-  implicit class JsonWritableSyntax[T](val value: T) extends AnyVal {
-
-    def toJson(implicit jsonWritable: JsonWritable[T]): Json =
-      jsonWritable.write(value)
-
-  }
-
-  val reportingParameters2: ReportingParameters = ReportingParameters(resourceType = "wibble", source = 42)
-  val reportingParametersJson2: Json = reportingParameters2.toJson
+  val blah = implicitly[JsonWritable[Int]]
 
   /*
   Debugging implicits: implicitly
@@ -106,6 +107,47 @@ object Typeclasses extends App {
   Implicit methods (Option example)
   Warning: avoid implicit conversions
    */
+
+
+  /*
+  Variance
+  Invariant - Maybe example
+  Covariant
+  Contravariant
+
+  Invariance in cats:
+    * Impact - option show
+    * Why
+    * How to work with it
+   */
+
+  sealed trait Fruit
+  case class Apple() extends Fruit
+  case class Pear() extends Fruit
+
+  implicit val MixedFruitWritable: JsonWritable[Fruit] = (value: Fruit) => value match {
+    case Apple() => JsonString("Apple")
+    case Pear()  => JsonString("Pear")
+  }
+
+  val fruit: Apple = Apple()
+  val fruitAsJson: Json = new JsonWritableSyntax[Apple](fruit)(MixedFruitWritable).asJson
+
+  import cats.implicits._
+
+  val name = "Bob".some
+  println(name.show)
+
+  /*
+  Contravariance
+  F[Fruit] is a sub type of F[Apple] if Apple is a sub type of fruit
+   */
+
+  /*
+  Invariance
+  F[Fruit] has no relation to an F[Apple] even though Apple is a sub type of fruit
+   */
+
 
   /*
   Exercise:
