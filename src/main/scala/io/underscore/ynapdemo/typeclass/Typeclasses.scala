@@ -186,6 +186,7 @@ object Typeclasses extends App  {
   Exercise - reimplement your solution using Show instead of Printable!
    */
 
+
   /*
   Introduction to the Eq typeclass in Cats
 
@@ -200,4 +201,5 @@ object Typeclasses extends App  {
   val optionCat1 = Option(cat1)
   val optionCat2 = Option.empty[Cat]
    */
+
 }
